@@ -11,9 +11,9 @@ while IFS= read -r word; do
 	neg_words["$word"]=1
 done < sentiment_txts/negative_words_en.txt
 
-DB_FILE="bigdata_prototype.ddb"
-QUERY_REDDIT="SELECT id, regexp_replace(body, '[\n\r]', ' ', 'g') AS body_cleaned FROM small_reddit"
-QUERY_TWITTER="SELECT status_id, regexp_replace(text, '[\n\r]', ' ', 'g') AS text_cleaned, lang FROM small_twitter"
+DB_FILE="clean_prototype.ddb"
+QUERY_REDDIT="SELECT id, body FROM small_reddit"
+QUERY_TWITTER="SELECT status_id, text, lang FROM small_twitter"
 
 # duckdb "$DB_FILE" -readonly -noheader -csv -separator '|' -c "$QUERY_REDDIT" | awk -F'|' '{ gsub(/[^a-zA-Z0-9 ]/, "", $2); print "ID:", $1, "Body:", $2 }'
 # duckdb "$DB_FILE" -readonly -noheader -csv -separator '|' -c "$QUERY_TWITTER" | awk -F'|' '{ gsub(/[^a-zA-Z0-9 ]/, "", $2); print "ID:", $1, "Text:", $2 }'
@@ -34,7 +34,7 @@ while IFS='|' read -r id body_text; do
     
     done
     # echo "Sentiment Score: $sentiment_score" 
-# duckdb "$DB_FILE" -c "UPDATE small_reddit SET sentiment_score = $sentiment_score WHERE id = '$id';"
+duckdb "$DB_FILE" -c "UPDATE small_reddit SET sentiment_score = $sentiment_score WHERE id = '$id';"
     
 done < <(duckdb "$DB_FILE" -readonly -noheader -csv -separator '|' -c "$QUERY_REDDIT")
 
