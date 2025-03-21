@@ -1,16 +1,5 @@
 #!/bin/bash
 
-#lock_check=$(lsof | grep "fulldata.ddb")
-
-#if [[ -n "$lock_check" ]]; then
-#    echo "Error: Database file is already locked by another process."
-#    echo "Process holding the lock: $lock_check"
-#    exit 1
-#else
-    # Proceed with your DuckDB query
-#    echo "not the prob"
-#fi
-
 declare -A pos_words_en
 declare -A neg_words_en
 
@@ -33,9 +22,7 @@ while IFS=',' read -r id lang body_text; do
         echo "$line"
     fi
 
-    #echo "ID: $id"
     clean_text=$(echo "$body_text" | sed 's/[^a-zA-Z0-9[:space:]]//g' | tr '[:upper:]' '[:lower:]')
-    #echo "Text: $clean_text"
 
     sentiment_score=0
 
@@ -47,9 +34,7 @@ while IFS=',' read -r id lang body_text; do
 		((sentiment_score--))
 	fi
     done
-
     
-    #echo "Sentiment Score: $sentiment_score" 
     duckdb "$DB_FILE" <<EOF
 INSERT INTO full_reddit (id, body, sentiment_score)
 VALUES ('$id', '$clean_text', $sentiment_score);
